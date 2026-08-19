@@ -804,14 +804,9 @@
         els.subtitleText.textContent = '';
         els.subtitleText.dataset.empty = 'false';
       }else{
-        const lines = state.subtitles[idx].text.split('\n');
-        els.subtitleText.innerHTML = '';
-        lines.forEach((line, i)=>{
-          const span = document.createElement('span');
-          span.className = 'sub-line';
-          span.textContent = line;
-          els.subtitleText.appendChild(span);
-        });
+                // Render the text directly, converting newlines to <br> so HTML tags stay intact
+        const safeText = state.subtitles[idx].text.replace(/\n/g, '<br>');
+        els.subtitleText.innerHTML = safeText;
         els.subtitleText.dataset.empty = 'false';
       }
     }
