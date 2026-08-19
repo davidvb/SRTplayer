@@ -17,7 +17,6 @@
 <link rel="shortcut icon" href="./favicon.ico" />
 <link rel="apple-touch-icon" sizes="180x180" href="./icon-180x180.png" />
 <link rel="manifest" href="./manifest.json" />
-<meta name="apple-mobile-web-app-title" content="SubSRT" />
 
 <title>SubSRT</title>
 <style>
@@ -81,11 +80,6 @@
     font-size:.72rem; color:var(--text-dimmer);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  #loadBtn{
-    background:var(--accent); color:#000; border:none; font-weight:700;
-    padding:.6rem 1rem; border-radius:999px; font-size:.85rem; cursor:pointer;
-  }
-  #loadBtn:active{opacity:.8;}
   .icon-btn{
     flex:0 0 auto;
     width:2.4rem; height:2.4rem;
@@ -147,6 +141,50 @@
   }
   #letterboxTop{top:0; background:linear-gradient(to bottom, #000, transparent);}
   #letterboxBottom{bottom:0; background:linear-gradient(to top, #000, transparent);}
+
+  /* ---------- Empty State / Centered Import ---------- */
+  #emptyState{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1.2rem;
+    transform:translateY(-100px);
+    z-index:10;
+  }
+  body:not(.no-file) #emptyState{display:none !important;}
+  body.no-file #subtitleText{display:none !important;}
+
+  #loadBtn{
+    background:var(--accent);
+    color:#000;
+    border:none;
+    font-weight:700;
+    padding:1rem 2.2rem;
+    border-radius:var(--r-lg);
+    font-size:1.1rem;
+    cursor:pointer;
+    box-shadow:0 4px 18px var(--accent-dim);
+    transition:transform .1s ease, opacity .12s ease;
+  }
+  #loadBtn:active{transform:scale(.96); opacity:.88;}
+
+  .app-logo {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    margin: 0 0 0.8rem 0;
+    color: #e8a33d;
+  }
+
+  .subdl-link{
+    color:var(--text-dim);
+    font-size:.9rem;
+    text-decoration:underline;
+    text-underline-offset:4px;
+    transition:color .15s ease;
+  }
+  .subdl-link:hover, .subdl-link:active{color:var(--accent);}
 
   /* ---------- Clean Canvas UI Hiding ---------- */
   body.ui-hidden #topbar,
@@ -387,7 +425,6 @@
 <div id="app">
 
   <header id="topbar">
-    <button id="loadBtn">Load SRT File</button>
     <div id="fileInfo" class="hidden">
       <div class="show-name" id="showName"></div>
       <div class="file-name" id="fileNameLabel"></div>
@@ -410,6 +447,17 @@
 
       <main id="stage">
         <div id="letterboxTop" class="letterbox"></div>
+        
+        <div id="emptyState">
+			  <!--  App Logo / Title -->
+  <h1 class="app-logo">SubSRT</h1>
+			  <!--  Import Button -->
+          <button id="loadBtn">Import Local SRT File</button>
+			  <!--  Link to External website -->
+		          <a href="https://subdl.com" target="_blank" rel="noopener noreferrer" class="subdl-link">Download subtitles here &rsaquo;
+</a>
+        </div>
+
         <div id="subtitleText" data-empty="true" aria-live="polite" aria-atomic="true">Load an .srt file to begin</div>
         <div id="letterboxBottom" class="letterbox"></div>
       </main>
@@ -886,7 +934,6 @@
 
     document.body.classList.remove('no-file');
     els.fileInfo.classList.remove('hidden');
-    els.loadBtn.classList.add('hidden');
     els.showName.textContent = state.displayName;
     els.fileNameLabel.textContent = filename;
 
@@ -1009,8 +1056,8 @@
   // Tapping anywhere on the app background or stage hides/shows the interface
   els.app.addEventListener('click', (e)=>{
     if(!state.subtitles.length) return;
-    // Don't hide UI if the click hit an interactive element (button, input, etc.)
-    if(e.target.closest('button, input, #timelineHit, .overlay')) return;
+    // Don't hide UI if the click hit an interactive element (button, input, link, etc.)
+    if(e.target.closest('button, input, a, #timelineHit, .overlay')) return;
     setUiHidden(!state.uiHidden);
   });
 
