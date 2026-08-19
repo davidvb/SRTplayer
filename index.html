@@ -523,7 +523,8 @@
       <div class="setting-label"><span>Font size</span><span id="fsLabel">32px</span></div>
       <div class="fs-row">
         <button class="ctrl ctrl-xs" id="fsMinus">A−</button>
-        <input type="range" id="fsSlider" min="0" max="7" step="1" value="4">
+        <!-- Updated max attribute to 12 -->
+        <input type="range" id="fsSlider" min="0" max="12" step="1" value="4">
         <button class="ctrl ctrl-xs" id="fsPlus">A+</button>
       </div>
     </div>
@@ -567,7 +568,8 @@
   /* ============================= Helpers ============================= */
   const $ = (sel)=>document.querySelector(sel);
   const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
-  const FONT_STEPS = [18,20,24,28,32,36,42,48];
+  // Updated array with larger font options
+  const FONT_STEPS = [18,20,24,28,32,36,42,48,56,64,72,84,96];
 
   function pad2(n){ return String(n).padStart(2,'0'); }
 
