@@ -430,7 +430,7 @@
       <div class="file-name" id="fileNameLabel"></div>
     </div>
     <div id="topbarIcons">
-      <button id="changeFileBtn" class="icon-btn" title="Load a different file">⇪</button>
+      <button id="changeFileBtn" class="icon-btn" title="Close current file">📁</button>
       <button id="readingBtn" class="icon-btn" title="Reading mode" aria-pressed="false">👁</button>
       <button id="lockBtn" class="icon-btn" title="Lock controls" aria-pressed="false">🔓</button>
       <button id="settingsBtn" class="icon-btn" title="Settings">⚙</button>
@@ -1154,7 +1154,17 @@
 
   /* ============================= File input / drag & drop ============================= */
   els.loadBtn.addEventListener('click', ()=> els.fileInput.click());
-  els.changeFileBtn.addEventListener('click', ()=> els.fileInput.click());
+  
+  els.changeFileBtn.addEventListener('click', ()=>{
+    pause();
+    document.body.classList.add('no-file');
+    els.fileInfo.classList.add('hidden');
+    els.subtitleText.textContent = 'Load an .srt file to begin';
+    els.subtitleText.dataset.empty = 'true';
+    try{ localStorage.removeItem(FILE_KEY); }catch(e){}
+    state.subtitles = [];
+  });
+
   els.fileInput.addEventListener('change', (e)=>{
     const file = e.target.files && e.target.files[0];
     if(file) handleFile(file);
