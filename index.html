@@ -5,9 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
+
+<!-- iOS Web App Metadata -->
+<meta name="apple-mobile-web-app-title" content="SubSRT">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- iOS App Icon and Web App Manifest -->
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180x180.png">
+<link rel="manifest" href="/manifest.json">
+
 <title>SubSRT</title>
 <style>
   :root{
@@ -59,6 +67,7 @@
     gap:.6rem;
     padding:.6rem .9rem;
     flex:0 0 auto;
+    z-index: 10;
   }
   #fileInfo{min-width:0; flex:1;}
   #fileInfo .show-name{
@@ -91,12 +100,12 @@
   .hidden{display:none !important;}
 
   /* ---------- Main area / layout switch ---------- */
-  #mainArea{flex:1; min-height:0; display:flex; flex-direction:column;}
+  #mainArea{flex:1; min-height:0; display:flex; flex-direction:column; position:relative;}
   #startAndStage{flex:1; min-height:0; display:flex; flex-direction:column;}
-  #belowStage{flex:0 0 auto; display:flex; flex-direction:column;}
+  #belowStage{flex:0 0 auto; display:flex; flex-direction:column; z-index:10;}
 
   /* ---------- Start Sync ---------- */
-  #startSyncWrap{padding:0 1rem .5rem; flex:0 0 auto;}
+  #startSyncWrap{padding:0 1rem .5rem; flex:0 0 auto; z-index:10;}
   #startSyncBtn{
     width:100%; height:3.25rem;
     background:var(--accent); color:#000;
@@ -127,6 +136,7 @@
     display:flex; flex-direction:column;
     align-items:center; justify-content:center;
     padding:0 1rem;
+    cursor:pointer;
   }
   .letterbox{
     position:absolute; left:0; right:0; height:clamp(10px,4vh,30px);
@@ -135,14 +145,14 @@
   #letterboxTop{top:0; background:linear-gradient(to bottom, #000, transparent);}
   #letterboxBottom{bottom:0; background:linear-gradient(to top, #000, transparent);}
 
-  body:not(.no-file) #stage{cursor:pointer;}
-
-  /* ---------- Fully hidden UI (tap subtitle to toggle) ---------- */
+  /* ---------- Clean Canvas UI Hiding ---------- */
   body.ui-hidden #topbar,
   body.ui-hidden #startSyncWrap,
   body.ui-hidden #belowStage,
   body.ui-hidden #exitReading,
-  body.ui-hidden #lockPill{display:none !important;}
+  body.ui-hidden #lockPill{
+    display:none !important;
+  }
 
   #subtitleText{
     font-family:var(--font-display);
@@ -153,6 +163,7 @@
     line-height:1.3;
     font-size:32px;
     white-space:pre-wrap;
+    pointer-events:none;
   }
   #subtitleText[data-empty="true"]{
     color:var(--text-dimmer);
@@ -659,6 +670,7 @@
 
   /* ============================= DOM refs ============================= */
   const els = {
+    app: $('#app'),
     fileInput: $('#fileInput'),
     loadBtn: $('#loadBtn'),
     changeFileBtn: $('#changeFileBtn'),
@@ -704,7 +716,7 @@
   async function requestWakeLock(){
     if('wakeLock' in navigator){
       try{ wakeLock = await navigator.wakeLock.request('screen'); }
-      catch(e){ /* not supported / not allowed right now — app still works */ }
+      catch(e){ /* not supported / not allowed right now */ }
     }
   }
   function releaseWakeLock(){
@@ -886,7 +898,6 @@
   els.startSyncBtn.addEventListener('click', ()=>{
     if(!state.subtitles.length) return;
     if(!state.armedForSync){
-      // Arm: reset position, restore saved/default offset, pause.
       pause();
       state.playbackPosition = 0;
       state.syncOffset = (settings.offsetsByFile && settings.offsetsByFile[state.filename] !== undefined)
@@ -986,13 +997,17 @@
   els.readingBtn.addEventListener('click', ()=> setReadingMode(!state.readingMode));
   els.exitReading.addEventListener('click', ()=> setReadingMode(false));
 
-  /* ---------- Tap subtitle to hide/show the entire UI ---------- */
+  /* ---------- Clean Canvas UI Hide/Show Toggle ---------- */
   function setUiHidden(on){
     state.uiHidden = on;
     document.body.classList.toggle('ui-hidden', on);
   }
-  els.stage.addEventListener('click', ()=>{
+
+  // Tapping anywhere on the app background or stage hides/shows the interface
+  els.app.addEventListener('click', (e)=>{
     if(!state.subtitles.length) return;
+    // Don't hide UI if the click hit an interactive element (button, input, etc.)
+    if(e.target.closest('button, input, #timelineHit, .overlay')) return;
     setUiHidden(!state.uiHidden);
   });
 
@@ -1134,7 +1149,7 @@
 
     const last = loadLastFile();
     if(last && last.text){
-      try{ loadSRTText(last.text, last.filename); }catch(e){ /* corrupt cache, ignore */ }
+      try{ loadSRTText(last.text, last.filename); }catch(e){ /* corrupt cache */ }
     }
 
     render();
