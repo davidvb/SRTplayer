@@ -1,7 +1,7 @@
 {
   "name": "SRT Subtitle Player",
   "short_name": "SubSRT",
-  "start_url": "/",
+  "start_url": "https://davidvb.github.io/SRTplayer/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
